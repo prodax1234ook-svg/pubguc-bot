@@ -1,0 +1,51 @@
+from flask import Flask, request
+import requests
+import webbrowser
+import threading
+
+# ------ تنظیمات ربات ------
+BOT_TOKEN = "توکن_ربات_تلگرام"
+CHAT_ID = "آیدی_چت_یا_گروه"
+# -------------------------
+
+app = Flask(__name__)
+
+@app.route("/")
+def home():
+    return """
+    <html lang="fa" dir="rtl">
+    <head>
+        <meta charset="utf-8">
+        <title>خرید UC PUBG</title>
+    </head>
+    <body style="font-family:tahoma;background:#111;color:#fff;text-align:center;padding-top:50px;">
+        <h1>خرید UC PUBG</h1>
+        <form action="/order" method="post" style="display:grid;gap:8px;max-width:300px;margin:auto;">
+            <input name="pubgId" placeholder="PUBG ID" required>
+            <input name="ucAmount" placeholder="تعداد UC" required>
+            <input name="contact" placeholder="راه ارتباط">
+            <button type="submit">ثبت سفارش</button>
+        </form>
+    </body>
+    </html>
+    """
+
+@app.route("/order", methods=["POST"])
+def order():
+    pubgId = request.form.get("pubgId")
+    ucAmount = request.form.get("ucAmount")
+    contact = request.form.get("contact", "-")
+
+    text = f"سفارش جدید 🎮\nPUBG ID: {pubgId}\nUC: {ucAmount}\nارتباط: {contact}"
+
+    url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
+    requests.post(url, json={"chat_id": CHAT_ID, "text": text})
+
+    return "<h2 style='text-align:center;color:lime;'>✅ سفارش ثبت شد</h2>"
+
+def open_browser():
+    webbrowser.open_new("http://127.0.0.1:5000")
+
+if __name__ == "__main__":
+    threading.Timer(1, open_browser).start()
+    app.run()
